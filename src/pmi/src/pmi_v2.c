@@ -107,6 +107,13 @@ PMI_API_PUBLIC int PMI2_Init(int *spawned, int *size, int *rank, int *appnum)
 
     PMIU_msg_set_query_fullinit(&pmicmd, USE_WIRE_VER, no_static, pmiid);
 
+    const char *s_pmijobid = getenv("PMI_JOBID");
+    if (s_pmijobid) {
+      PMIU_cmd_add_str(&pmicmd, "pmijobid", s_pmijobid);
+    }
+
+    PMIU_cmd_add_bool(&pmicmd, "threaded", false);
+
     pmi_errno = PMIU_cmd_get_response(PMI_fd, &pmicmd);
     PMIU_ERR_POP(pmi_errno);
 
