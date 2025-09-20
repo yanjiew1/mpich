@@ -176,6 +176,17 @@ PMI_API_PUBLIC int PMI_Init(int *spawned)
     pmi_errno = PMII_getmaxes(&PMI_kvsname_max, &PMI_keylen_max, &PMI_vallen_max);
     PMIU_ERR_POP(pmi_errno);
 
+    /*
+     * Slurm reports that the maximum supported value length is 1024 bytes.
+     * However, it is known that Slurm only supports a command length of
+     * up to 1024 bytes in its PMI-1 implementation,
+     * so we limit the value length to 512 bytes when we are launched directly by slurm.
+     */
+    if ((p = getenv("SLURM_MPI_TYPE")) && strcmp(p, "pmi2") == 0) {
+        if (PMI_vallen_max > 512)
+            PMI_vallen_max = 512;
+    }
+
     /* FIXME: This is something that the PM should tell the process,
      * rather than deliver it through the environment */
     if ((p = getenv("PMI_SPAWNED")))
